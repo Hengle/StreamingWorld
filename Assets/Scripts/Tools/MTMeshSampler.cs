@@ -117,6 +117,7 @@
                     new Vector2(uv.x + 0.5f * subuvstep.x, uv.y + 0.5f * subuvstep.y));
             }
         }
+
         public override void GetData(List<SampleVertexData> lData, Dictionary<byte, List<SampleVertexData>> bd)
         {
             for (int i = 0; i < 4; ++i)
@@ -196,6 +197,10 @@
             }
         }
     }
+
+    /// <summary>
+    /// one samplerTree for one grid
+    /// </summary>
     public class SamplerTree
     {
         public const byte LBCorner = 0;

@@ -9,6 +9,9 @@
         public float SlopeAngleError = 5f;
     }
 
+    /// <summary>
+    /// One job for one lod
+    /// </summary>
     public class CreateDataJob
     {
         public MTTerrainScanner[] LODs;
@@ -73,6 +76,9 @@
         }
     }
 
+    /// <summary>
+    /// one scaner for one lod
+    /// </summary>
     public class MTTerrainScanner : ITerrainTreeScaner
     {
         public int maxX { get; private set; }
@@ -180,6 +186,15 @@
                     detailedX + detailedSize - 1, v + detailedZ, SamplerTree.RBorder, sampler);
             }
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="fx"></param>
+        /// <param name="fz"></param>
+        /// <param name="x"></param>
+        /// <param name="z"></param>
+        /// <param name="bk"></param>
+        /// <param name="sampler"></param>
         private void RayCastBoundary(float fx, float fz, int x, int z, byte bk, SamplerTree sampler)
         {
             Vector3 top = vCheckTop + fx * Vector3.right + fz * Vector3.forward;
@@ -206,9 +221,11 @@
             Vector3 center = vCheckTop + fx * Vector3.right + fz * Vector3.forward;
             Vector2 uv = new Vector2((curXIdx + 0.5f) / maxX, (curZIdx + 0.5f) / maxZ);
             Vector2 uvstep = new Vector2(1f / maxX, 1f / maxZ);
-            if (Trees[curXIdx * maxZ + curZIdx] == null)
-                Trees[curXIdx * maxZ + curZIdx] = new SamplerTree(subdivision, center, gridSize, uv, uvstep);
-            ScanTree(Trees[curXIdx * maxZ + curZIdx]);
+            int currentTreeIdx = curXIdx * maxZ + curZIdx;
+            if (Trees[currentTreeIdx] == null)
+                Trees[currentTreeIdx] = new SamplerTree(subdivision, center, gridSize, uv, uvstep);
+
+            ScanTree(Trees[currentTreeIdx]);
             //update idx
             ++curXIdx;
             if (curXIdx >= maxX)

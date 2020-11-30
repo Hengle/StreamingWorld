@@ -55,11 +55,14 @@ internal class MTRuntimeMesh
 {
     public int MeshID { get; private set; }
     private Mesh[] mLOD;
-    public MTRuntimeMesh(int meshid, int lod, string dataName)
+    public MTRuntimeMesh(int meshid, int lod, string dataName, bool isMeshAsset = false)
     {
         MeshID = meshid;
         mLOD = new Mesh[lod];
-        MTFileUtils.LoadMesh(mLOD, dataName, meshid);
+        if (isMeshAsset)
+            MTFileUtils.LoadMeshAsset(mLOD, dataName, meshid, lod);
+        else
+            MTFileUtils.LoadMesh(mLOD, dataName, meshid);
     }
     public Mesh GetMesh(int lod)
     {
@@ -83,6 +86,9 @@ public class MTLoader : MonoBehaviour
     //meshes
     private Dictionary<int, MTRuntimeMesh> mMeshPool = new Dictionary<int, MTRuntimeMesh>();
     private bool mbDirty = true;
+
+    public bool useMeshAsset = false;
+
     private Mesh GetMesh(uint patchId)
     {
         int mId = (int)(patchId >> 2);
@@ -91,7 +97,7 @@ public class MTLoader : MonoBehaviour
         {
             return mMeshPool[mId].GetMesh(lod);
         }
-        MTRuntimeMesh rm = new MTRuntimeMesh(mId, mHeader.LOD, mHeader.DataName);
+        MTRuntimeMesh rm = new MTRuntimeMesh(mId, mHeader.LOD, mHeader.DataName, useMeshAsset);
         mMeshPool.Add(mId, rm);
         return rm.GetMesh(lod);
     }
@@ -139,7 +145,6 @@ public class MTLoader : MonoBehaviour
         //every 10 frame update once
         if (mCamera == null || mRoot == null || !mCamera.enabled || !mbDirty)
             return;
-        Debug.Log("Loader Update");
         mbDirty = false;
         Plane[] planes = GeometryUtility.CalculateFrustumPlanes(mCamera);
         mVisiblePatches.Reset();

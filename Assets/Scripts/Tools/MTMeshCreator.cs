@@ -88,7 +88,7 @@ public class MTMeshCreator : MonoBehaviour
         VolumnBound = Terrain.activeTerrain.terrainData.bounds;
         VolumnBound.center += Terrain.activeTerrain.transform.position;
         int gridMax = 1 << QuadTreeDepth;
-        mCreateDataJob = new CreateDataJob(VolumnBound, gridMax, gridMax, LOD);
+        mCreateDataJob = new  CreateDataJob(VolumnBound, gridMax, gridMax, LOD);
     }
     public bool EditorCreateDataUpdate()
     {
@@ -125,6 +125,12 @@ public class MTMeshCreator : MonoBehaviour
             Directory.Delete(filePath, true);
         Directory.CreateDirectory(filePath);
 
+        string assetPath = string.Format("{0}/Resources/{1}", Application.dataPath, DataName);
+        if (Directory.Exists(assetPath))
+            Directory.Delete(assetPath, true);
+        Directory.CreateDirectory(assetPath);
+
+
         //save data
         MTQuadTreeHeader header = new MTQuadTreeHeader(DataName);
         header.QuadTreeDepth = QuadTreeDepth;
@@ -136,8 +142,10 @@ public class MTMeshCreator : MonoBehaviour
             MTMeshHeader mh = new MTMeshHeader(m.meshId, m.center);
             header.Meshes.Add(m.meshId, mh);
             MTFileUtils.SaveMesh(DataName, m);
+            MTFileUtils.SaveMeshAsset(DataName, m);
         }
         MTLog.Log("mesh saved!");
+        MTLog.Log("mesh asset saved!");
         MTFileUtils.SaveQuadTreeHeader(DataName, header, Terrain.activeTerrain.terrainData.alphamapTextureCount);
         MTLog.Log("header saved!");
         string matPath = "Assets/Resources";

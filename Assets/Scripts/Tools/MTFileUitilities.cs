@@ -5,6 +5,7 @@
     using System;
     using System.IO;
     using UnityEngine.Networking;
+    using UnityEditor;
 
     public static class MTFileUtils
     {
@@ -154,6 +155,25 @@
             stream.Close();
         }
 
+        public static void SaveMeshAsset(string dataName, MTMeshData data)
+        {
+#if UNITY_EDITOR
+
+            for (int i = 0; i < data.lods.Length; i++)
+            {
+                string meshName = string.Format("{0}_{1}_LOD {2}", dataName, data.meshId, i);
+                string assetName = string.Format("Assets/Resources/{0}/{1}.asset", dataName, meshName);
+                Mesh mesh = new Mesh();
+                mesh.vertices = data.lods[i].vertices;
+                mesh.normals = data.lods[i].normals;
+                mesh.uv = data.lods[i].uvs;
+                mesh.triangles = data.lods[i].faces;
+                AssetDatabase.CreateAsset(mesh, assetName);
+                mesh.name = meshName;
+            }
+#endif            
+        }
+
         private static List<Vector3> _vec3Cache = new List<Vector3>();
         private static List<Vector2> _vec2Cache = new List<Vector2>();
         private static List<int> _intCache = new List<int>();
@@ -168,7 +188,6 @@
             byte[] nBuff = new byte[byteLen];
             stream.Read(nBuff, 0, byteLen);
             int lods = BitConverter.ToInt32(nBuff, 0);
-            Debug.Log("Load Mesh Lod : " + lods + "--MeshLength-->" + meshes.Length);
             if (meshes.Length != lods)
             {
                 MTLog.LogError("meshes length does not match lods");
@@ -212,6 +231,23 @@
                 meshes[l].triangles = _intCache.ToArray();
             }
             stream.Close();
+        }
+
+        public static void LoadMeshAsset(Mesh[] meshes, string dataName, int meshId, int LODLevel)
+        {
+            if (meshes.Length != LODLevel)
+            {
+                MTLog.LogError("meshes length does not match lods");
+                return;
+            }
+
+            for (int i = 0; i < LODLevel; i++)
+            {
+                string meshName = string.Format("{0}_{1}_LOD {2}", dataName, meshId, i);
+                string assetName = string.Format("{0}/{1}", dataName, meshName);
+                Debug.Log(assetName);
+                meshes[i] = Resources.Load<Mesh>(assetName);
+            }
         }
     }
 }
